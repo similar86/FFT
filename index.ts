@@ -1,40 +1,61 @@
-import { FFT } from "./FFT/FFT";
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { ChartConfiguration } from 'chart.js';
-import * as fs from 'fs';
-
-// キャンバスサイズ
-const width = 800;
-const height = 600;
-
-// キャンバスを作成
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-
-// グラフの設定
-const config: ChartConfiguration = {
-  type: 'line',
-  data: {
-    labels: [0, 1, 2, 3, 4, 5],
-    datasets: [{
-      label: 'y = FFT',
-      data: [0, 1, 4, 9, 16, 25],
-      borderColor: 'blue',
-      fill: false
-    }]
+import {
+    Chart,
+    LineController,
+    LineElement,
+    PointElement,
+    LinearScale,
+    Title,
+    CategoryScale
+  } from 'chart.js';
+  import { FFT } from './src/FFT/FFT';
+  
+  Chart.register(LineController, LineElement, PointElement, LinearScale, Title, CategoryScale);
+  
+  let chart: Chart | null = null;
+  
+  function parseInput(input: string): number[] {
+    return input.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
   }
-};
-
-// グラフ画像を生成して保存
-async function createChartImage() {
-  const buffer = await chartJSNodeCanvas.renderToBuffer(config);
-  fs.writeFileSync('./output-graph.png', buffer);
-  console.log('✅ グラフ画像を出力しました: output-graph.png');
-}
-
-createChartImage();
-
-
-const fft_result = new FFT();
-const sample : number[] = [1 ,0];
-console.log(fft_result.DFT(sample));
-console.log(fft_result.IDFT(fft_result.DFT(sample)));
+  
+  function updateChart(data: number[]) {
+    const labels = data.map((_, i) => i);
+  
+    const config = {
+      type: 'line' as const,
+      data: {
+        labels,
+        datasets: [{
+          label: 'FFT 振幅スペクトル',
+          data,
+          borderColor: 'blue',
+          fill: false
+        }]
+      }
+    };
+  
+    const canvas = document.getElementById('myChart') as HTMLCanvasElement;
+  
+    if (chart) {
+      chart.destroy();
+    }
+  
+    chart = new Chart(canvas, config);
+  }
+  
+  window.onload = () => {
+    const btn = document.getElementById('runBtn') as HTMLButtonElement;
+    const inputField = document.getElementById('inputData') as HTMLInputElement;
+  
+    btn.onclick = () => {
+      const inputArray = parseInput(inputField.value);
+      const fft = new FFT();
+      const result = fft.DFT(inputArray);
+      const amplitude = result.map(p => Math.sqrt(p.real ** 2 + p.imag ** 2));
+  
+      updateChart(amplitude);
+    };
+  
+    // 初回表示用
+    btn.click();
+  };
+  

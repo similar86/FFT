@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>XY グラフ</title>
+  <meta charset="UTF-8" />
+  <title>FFT グラフ描画</title>
+  <!-- Chart.js を CDN から読み込む -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <canvas id="myChart" width="600" height="400"></canvas>
-  <script src="./index.js"></script>
+  <h2>FFT グラフ描画</h2>
+  <canvas id="myChart" width="600" height="400"></canvas><br>
+  <label>信号入力（カンマ区切り）：
+    <input type="text" id="inputData" value="0,1,0,-1,0,1" />
+  </label>
+  <button id="runBtn">FFT実行</button>
+
+  <script src="main.js"></script> <!-- ビルド後のJSファイル -->
 </body>
 </html>
